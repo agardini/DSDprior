@@ -1,0 +1,33 @@
+Package: DSDprior
+Title: Fitting latent Gaussian models with DSD priors for scales
+Version: 0.0.1
+Description: The package allows to fit latent Gaussian models with Gaussian and Bernoulli likelihoods using Design and Scale Depenend (DSD) priors for scale parameters. 
+Authors@R: 
+    c(person(given = "Aldo",
+           family = "Gardini",
+           role = c("aut", "cre"),
+           email = "aldo.gardini@unibo.it"),
+      person(given = "Fedele",
+           family = "Greco",
+           role = c("aut"),
+           email = "fedele.greco@unibo.it"))
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+LinkingTo: 
+    Rcpp,
+    RcppEigen,
+    RcppGSL,
+    RcppDist
+Imports: 
+    purrr,
+    dplyr,
+    Rcpp,
+    coda,
+    MCMCvis,
+    GB2,
+    BayesLogit,
+    magrittr,
+    tibble

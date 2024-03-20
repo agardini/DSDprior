@@ -1,0 +1,425 @@
+#define RCPPDIST_DONT_USE_ARMA
+
+#include <RcppEigen.h>
+#include <RcppGSL.h>
+#include <Rcpp.h>
+#include <complex>
+#include <RcppDist.h>
+#include "prior.h"
+#include "MCMCtools.h"
+
+extern "C"
+{
+#include <gsl/gsl_sf_gamma.h>
+#include <gsl/gsl_sf_hyperg.h>
+}
+using namespace Rcpp;
+using namespace Eigen;
+
+
+
+double l_lik_logit(Eigen::VectorXd Xbeta, Eigen::VectorXd Zg, Eigen::VectorXi y){
+  Eigen::VectorXd logit_p = Xbeta + Zg;
+  int n = y.size();
+  Eigen::VectorXd p(n), ump(n);
+  double out = 0;
+  for(int j = 0; j < n; j++){
+    p[j] = std::log(std::exp(logit_p[j]) / (1.0 + std::exp(logit_p[j])));
+    ump[j] = std::log(1.0 / (1.0 + std::exp(logit_p[j])));
+    out += p[j] * y[j] + ump[j] * (1.0 - y[j]);
+  }
+  return(out);
+}
+
+
+
+void compute_Qb_g_fc_logit(Eigen::SparseMatrix<double>& Q,
+                           Eigen::VectorXd& b,
+                           Eigen::VectorXd omega,
+                           Eigen::SparseMatrix<double> K_g,
+                           Eigen::SparseMatrix<double> Z,
+                           Eigen::VectorXd res_g,
+                           double s2g){
+  // Puttanata per usare cwiseinverse........
+  int n = omega.size();
+  Eigen::VectorXd lambda(n);
+  for(int k = 0; k < n; k++){
+    lambda[k] = 1.0 / omega[k];
+  }
+
+  Eigen::DiagonalMatrix<double, Dynamic> W = lambda.cwiseInverse().asDiagonal();
+  Q = Z.transpose() * W * Z + K_g/s2g;
+  b = (1.0) * Z.transpose() * W * res_g;
+
+}
+
+
+void gibbs_beta_logit(Eigen::VectorXd& beta,
+                      Eigen::VectorXd& Xbeta,
+                      Eigen::MatrixXd X,
+                      Eigen::VectorXd omega,
+                      Eigen::MatrixXd Q_beta,
+                      Eigen::VectorXd res_beta){
+
+  // Puttanata per usare cwiseinverse........
+  int n = omega.size();
+  Eigen::VectorXd lambda(n);
+  for(int k = 0; k < n; k++){
+    lambda[k] = 1.0 / omega[k];
+  }
+
+  Eigen::DiagonalMatrix<double, Dynamic> W = lambda.cwiseInverse().asDiagonal();
+  Eigen::LLT<MatrixXd> chol_Q_fc( X.transpose() * W * X +  Q_beta);  //L
+  Eigen::VectorXd mu = chol_Q_fc.solve((1.0) * X.transpose() * W * res_beta); //B
+  Eigen::VectorXd z = Rcpp::as<VectorXd>(Rcpp::rnorm(X.cols()));
+
+  beta = chol_Q_fc.matrixU().solve(z) + mu; //??
+  Xbeta = X * beta;
+}
+
+
+
+void compute_Zt_omega_Z(Eigen::SparseMatrix<double>& Zt_omega_Z,
+                        Eigen::SparseMatrix<double> Z,
+                        Eigen::VectorXd omega){
+  // Puttanata per usare cwiseinverse........
+  int n = omega.size();
+  Eigen::VectorXd lambda(n);
+  for(int k = 0; k < n; k++){
+    lambda[k] = 1.0 / omega[k];
+  }
+  Eigen::DiagonalMatrix<double, Dynamic> W = lambda.cwiseInverse().asDiagonal();
+  Zt_omega_Z = Z.transpose() * W * Z;
+}
+
+
+double lfc_block_logit(Eigen::VectorXd gamma,
+                       double s2g,
+                       Eigen::VectorXd mu,
+                       Eigen::SparseMatrix<double> Q,
+                       double l_det_Q,
+                       Eigen::MatrixXd A,
+                       Eigen::VectorXd e,
+                       Eigen::MatrixXd W,
+                       Eigen::SparseMatrix<double> K,
+                       int rank,
+                       Rcpp::List pri_s2,
+                       Eigen::VectorXd Xbeta,
+                       Eigen::VectorXi y,
+                       Eigen::SparseMatrix<double> Z){
+
+  double lfc_gamma, lfc_joint, lfc;
+
+  Eigen::VectorXd g_mu = gamma - mu;
+
+  lfc_gamma = 0.5 * l_det_Q - 0.5 * g_mu.transpose() * Q * g_mu;
+
+  if (!NumericVector::is_na(A(0,0))){
+    Eigen::VectorXd e_Amu = e - A * mu;
+    lfc_gamma -= - 0.5 * std::log(W.determinant()) - 0.5 * e_Amu.transpose() * W.inverse() * e_Amu;
+  }
+
+  Eigen::VectorXd Zg = Z * gamma;
+
+  lfc_joint = l_lik_logit(Xbeta, Zg, y) - (rank / 2.0) * std::log(s2g) -
+    (1.0 / (2.0 * s2g)) * gamma.transpose() * K * gamma +
+    l_pri_s2(s2g, pri_s2);
+  lfc = lfc_joint - lfc_gamma;
+
+  return(lfc);
+}
+
+// [[Rcpp::export]]
+Rcpp::List sample_logitm(const Eigen::VectorXi y,
+                         const Eigen::MatrixXd X,
+                         const Rcpp::List Z_list,
+                         const Rcpp::List K_list,
+                         const std::vector<int> rank_K_g,
+                         const Rcpp::List A_list,
+                         const Rcpp::List e_list,
+                         const Eigen::MatrixXd S_beta,
+                         const Rcpp::List pri_s2e,
+                         const Rcpp::List pri_s2b,
+                         const Rcpp::List pri_s2g,
+                         const Eigen::VectorXd beta_init,
+                         const Rcpp::List g_init_list,
+                         const Eigen::VectorXd S2g_init,
+                         const double s2e_init,
+                         double FFe,
+                         Eigen::VectorXd FFb,
+                         Eigen::VectorXd FFg,
+                         const int niter, const int pr, const int thin,
+                         const int ntuning, const int stop_tuning){
+
+  ///////////////////////////////////////////////////////////////////////
+  // Initialise mcmc objects - s2e, s2b and s2g
+  ///////////////////////////////////////////////////////////////////////
+
+  ////////////// s2e  //////////////
+  double s2e = s2e_init;
+
+  int
+    Ta_s2e = 0, n_acc_s2e = 0;
+
+  ////////////// s2b  //////////////
+  int p = X.cols();
+
+  Eigen::VectorXd
+    s2b = S_beta.diagonal();
+
+  std::vector<int>
+    Ta_s2b(p, 0), n_acc_s2b(p, 0);
+
+  ////////////// s2g  //////////////
+  int q = Z_list.length();
+
+  double
+    s2g_prop;
+
+  Eigen::VectorXd
+    s2g_curr = S2g_init;
+
+  std::vector<int>
+    n_acc_s2g(q);
+
+  std::vector<int>
+    Ta_s2g(q);
+
+  //////////////  normale trunc  //////////////
+  int n = X.rows();
+  Eigen::VectorXd
+    z_aux(n), omega(n), kappa(n);
+
+  ///////////////////////////////////////////////////////////////////////
+  // Initialise mcmc objects - beta
+  ///////////////////////////////////////////////////////////////////////
+  Eigen::VectorXd
+    beta = beta_init, Xbeta = X * beta;
+  for(int i = 0; i < n; i++){
+    kappa[i] = y[i] - 0.5;
+  }
+
+  Eigen::MatrixXd
+    Q_beta = S_beta.inverse();
+
+  //////////////////////////////////////////////////////////////////////
+  // Fixed quantities - beta
+  ///////////////////////////////////////////////////////////////////////
+  Eigen::MatrixXd
+    XtX = X.transpose() * X;
+
+  ///////////////////////////////////////////////////////////////////////
+  // Initialise mcmc objects - gamma
+  ///////////////////////////////////////////////////////////////////////
+  std::vector<Eigen::VectorXd>
+    g_curr(q);
+
+  for(int j=0; j<q ;j++){
+    g_curr[j] = Rcpp::as<Eigen::VectorXd>(g_init_list[j]);
+  }
+
+  Eigen::VectorXd
+    Zg = Eigen::VectorXd::Zero(n),
+      g_prop, res_g, b_g,
+      mu_g_fc;
+
+  Eigen::SparseMatrix<double>
+    Q_g_fc;
+
+  Eigen::MatrixXd
+    V, W;
+
+  double
+    ldet_Q_g_fc,
+    l_fc_g_s2g_prop, l_fc_g_s2g_curr;
+
+  ///////////////////////////////////////////////////////////////////////
+  // Initialise fixed quantities - gamma
+  ///////////////////////////////////////////////////////////////////////
+  std::vector<Eigen::SparseMatrix<double> >
+    Z(q), K_g(q);
+
+  std::vector<Eigen::MatrixXd>
+    A(q);
+
+  std::vector<Eigen::VectorXd>
+    e(q);
+
+  std::vector<int>
+    mj(q);
+
+  for(int j=0; j<q ;j++){
+    Z[j] = Rcpp::as<Eigen::SparseMatrix<double> >(Z_list[j]);
+    mj[j] = Z[j].cols();
+    K_g[j] = Rcpp::as<Eigen::SparseMatrix<double> >(K_list[j]);
+    A[j] = Rcpp::as<Eigen::MatrixXd>(A_list[j]);
+    e[j] = Rcpp::as<Eigen::VectorXd>(e_list[j]);
+  }
+
+  std::vector<Eigen::SimplicialLLT<Eigen::SparseMatrix<double>, Eigen::Lower> >
+    Chol_Q_g(q);
+
+  for(int j=0; j<q ;j++){
+    compute_res_gamma(res_g, j, z_aux, Xbeta, Z, g_curr);
+    compute_Qb_g_fc_logit(Q_g_fc, b_g, omega, K_g[j], Z[j], res_g, s2g_curr[j]);
+    Chol_Q_g[j].analyzePattern(Q_g_fc);
+  }
+
+
+  ///////////////////////////////////////////////////////////////////////
+  // Initialise objects for storage
+  ///////////////////////////////////////////////////////////////////////
+  int storeind = 0, nstore = niter / thin;
+
+  Eigen::VectorXd
+    s2e_mc(nstore);
+
+  Eigen::MatrixXd
+    beta_mc(nstore, p),
+    s2b_mc(nstore, p);
+
+  std::vector<double>
+    FFes;
+
+  Eigen::MatrixXd
+    FFbs(stop_tuning / ntuning, p);
+
+  Eigen::MatrixXd
+    s2g_mc(nstore, q);
+
+  std::vector<Eigen::MatrixXd>
+    g_mc(q);
+  for(int j=0; j<q; j++){
+    g_mc[j] = Eigen::MatrixXd::Zero(nstore, mj[j]);
+  }
+
+  Eigen::MatrixXd
+    FFgs(nstore, q);
+
+
+  ///////////////////////////////////////////////////////////////////////
+  // MCMC sampler
+  ///////////////////////////////////////////////////////////////////////
+  time_t now;
+  for(int k=0;k<niter;k++){
+
+    ///////////////////////////////////////////////////////////////////////
+    // Sampling z_aux
+    ///////////////////////////////////////////////////////////////////////
+    for(int i = 0; i < n; i++){
+      omega[i] = my_rpg(1.0, Xbeta[i] + Zg[i]);
+      z_aux[i] = kappa[i] / omega[i];
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+    // Sampling beta and s2b
+    ///////////////////////////////////////////////////////////////////////
+    gibbs_beta_logit(beta, Xbeta, X, omega, Q_beta, z_aux - Zg);
+    metropolis_s2b(s2b, Q_beta, beta, pri_s2b, FFb, n_acc_s2b);
+
+    ///////////////////////////////////////////////////////////////////////
+    // Sampling (gamma, s2g)
+    ///////////////////////////////////////////////////////////////////////
+    Zg = Zg * 0.0;
+    for(int j=0; j<q ;j++){
+      compute_res_gamma(res_g, j, z_aux, Xbeta, Z, g_curr);
+
+      rprop_rw(s2g_prop, s2g_curr[j], FFg[j]);
+
+      // Full conditionals parameters - curr
+      compute_Qb_g_fc_logit(Q_g_fc, b_g, omega, K_g[j], Z[j], res_g, s2g_curr[j]);
+      Chol_Q_g[j].factorize(Q_g_fc);
+      mu_g_fc = Chol_Q_g[j].solve(b_g);
+      ldet_Q_g_fc = 2.0 * Chol_Q_g[j].matrixL().toDense().diagonal().array().log().sum();
+      if (!Rcpp::NumericVector::is_na(A[j](0,0))){
+        V = Chol_Q_g[j].solve(A[j].transpose());
+        W = A[j] * V;
+        //g_curr[j] è già costretto
+      }
+      l_fc_g_s2g_curr = lfc_block_logit(g_curr[j], s2g_curr[j],
+                                        mu_g_fc, Q_g_fc, ldet_Q_g_fc, A[j], e[j], W,
+                                        K_g[j], rank_K_g[j], pri_s2g[j], Xbeta, y, Z[j]);
+
+      // Full conditionals parameters - prop
+      compute_Qb_g_fc_logit(Q_g_fc, b_g, omega, K_g[j], Z[j], res_g, s2g_prop);
+      Chol_Q_g[j].factorize(Q_g_fc);
+      mu_g_fc = Chol_Q_g[j].solve(b_g);
+      ldet_Q_g_fc = 2.0 * Chol_Q_g[j].matrixL().toDense().diagonal().array().log().sum();
+
+      // proposal of gamma
+      g_prop = Chol_Q_g[j].permutationPinv() *
+        Chol_Q_g[j].matrixU().solve(Rcpp::as<Eigen::VectorXd>(Rcpp::rnorm(K_g[j].cols())));
+      g_prop += mu_g_fc;
+
+      if (!Rcpp::NumericVector::is_na(A[j](0,0))){
+        V = Chol_Q_g[j].solve(A[j].transpose());
+        W = A[j] * V;
+        correction_sample_ulc(g_prop, A[j], e[j], W, V);
+      }
+      l_fc_g_s2g_prop = lfc_block_logit(g_prop, s2g_prop,
+                                        mu_g_fc, Q_g_fc, ldet_Q_g_fc, A[j], e[j], W,
+                                        K_g[j], rank_K_g[j], pri_s2g[j], Xbeta, y, Z[j]);
+
+      // acceptance step
+      if(metropolis_acceptance(l_fc_g_s2g_prop, l_fc_g_s2g_curr) == 1L){
+        s2g_curr[j] = s2g_prop;
+        g_curr[j] = g_prop;
+        n_acc_s2g[j] += 1;
+      }
+
+      Zg += Z[j]*g_curr[j];
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////
+    // Tuning
+    ///////////////////////////////////////////////////////////////////////
+    if(k < stop_tuning){
+      if((k+1)%ntuning==0) {
+        for(int j = 0; j<p ;j++){
+          if(is_mixture_pri_beta(pri_s2b[j]) == 1L){
+            tune(FFb[j], n_acc_s2b[j], ntuning, 0.44, Ta_s2b[j]);
+            FFbs(Ta_s2b[j]-1, j) = FFb[j];
+          }
+        }
+        for(int j=0; j<q ;j++){
+          tune(FFg[j], n_acc_s2g[j], ntuning, 0.44, Ta_s2g[j]);
+          FFgs(Ta_s2g[j]-1, j) = FFg[j];
+        }
+      }
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+    // Storage
+    ///////////////////////////////////////////////////////////////////////
+    if ((k+1)%thin == 0){
+      beta_mc.row(storeind) = beta;
+      s2b_mc.row(storeind) = s2b;
+      s2g_mc.row(storeind) = s2g_curr;
+      s2e_mc(storeind) = s2e;
+      for(int j=0;j<q;j++){
+        g_mc[j].row(storeind) = g_curr[j];
+      }
+      storeind += 1;
+    }
+
+    if ((k+1)%pr==0){
+      time(&now);
+      Rprintf("Iteration: %d: %s", k+1, ctime(&now));
+    }
+
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("s2b") = s2b_mc,
+    Rcpp::Named("s2g") = s2g_mc,
+    Rcpp::Named("s2e") = s2e_mc,
+    Rcpp::Named("beta") = beta_mc,
+    Rcpp::Named("gamma") = g_mc,
+    Rcpp::Named("FFbs") = FFbs,
+    Rcpp::Named("FFgs") = FFgs,
+    Rcpp::Named("Ta_s2b") = Ta_s2b,
+    Rcpp::Named("Qbeta") = Q_beta);
+}
+
+
