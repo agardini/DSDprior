@@ -244,14 +244,14 @@ get_DSD_par <- function(reff){
       egiendec_K <- eigen(K)
       Up <- egiendec_K$vectors[ , -((rank_K + 1):m_j)]
 
-      mat <- spam::crossprod(center_col(Z), Z) %*% spam::t(spam::t(Up) * 1/egiendec_K$values[-((rank_K + 1):m_j)]) %*%  spam::t(Up)
+      mat <- spam::crossprod.spam(center_col(Z), Z) %*% spam::t(spam::t(Up) * 1/egiendec_K$values[-((rank_K + 1):m_j)]) %*%  spam::t(Up)
       lambdas_pri <- Re(eigen(mat)$val)[1:my_rank(mat)]
 
       alpha_til <- sum(lambdas_pri)^2 / (2 * sum(lambdas_pri^2))
       beta_til <- (n - 1)  * sum(lambdas_pri) / (2*sum(lambdas_pri^2))
     }else{
       n <- nrow(Z)
-      mat <- spam::crossprod(center_col(Z), Z) %*% spam::solve(K)
+      mat <- spam::crossprod.spam(center_col(Z), Z) %*% spam::solve(K)
       lambdas_pri <- Re(eigen(mat)$val)
 
       alpha_til <- sum(lambdas_pri)^2 / (2 * sum(lambdas_pri^2))
