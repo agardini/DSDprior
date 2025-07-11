@@ -7,12 +7,12 @@
 burn_thin(out, n_burn, n_thin = 1)
 }
 \arguments{
-\item{out}{Object created by \link{\code{sample_modelDSD}} or \link{\code{sample_model_manual}}.}
+\item{out}{Object created by \code{sample_modelDSD} or \code{sample_model_manual}.}
 
 \item{n_burn}{Length burn-in period.}
 
 \item{n_thin}{Length thinning interval.}
 }
 \description{
-Providing as input an object created by \link{\code{sample_modelDSD}} and \link{\code{sample_model_manual}}, the function performs burn-in and thinning of the chain.
+Providing as input an object created by \code{sample_modelDSD} and \code{sample_model_manual}, the function performs burn-in and thinning of the chain.
 }

@@ -7,8 +7,8 @@
 posterior_summaries(model_out)
 }
 \arguments{
-\item{model_out}{Object created by \link{\code{sample_modelDSD}}, \link{\code{sample_model_manual}} or \link{\code{burn_thin}}.}
+\item{model_out}{Object created by \code{sample_modelDSD}, \code{sample_model_manual} or \code{burn_thin}.}
 }
 \description{
-Providing as input an object created by \link{\code{sample_modelDSD}}, \link{\code{sample_model_manual}} or \link{\code{burn_thin}}, the function computes posterior summaries.
+Providing as input an object created by \code{sample_modelDSD}, \code{sample_model_manual} or \code{burn_thin}, the function computes posterior summaries.
 }

@@ -40,6 +40,14 @@ void metropolis_s2b(Eigen::VectorXd& s2b,
                     Eigen::VectorXd FFb,
                     std::vector<int>& n_acc_s2b);
 
+void metropolis_s2g_noblock(Eigen::VectorXd& s2g,
+                            Eigen::MatrixXd Q_gamma_j,
+                            Eigen::VectorXd gamma_j,
+                            Rcpp::List pri_s2g_j,
+                            double rank_Q_j,
+                            double FFg_j,
+                            int j,
+                            std::vector<int>& n_acc_s2g);
 
 void compute_res_gamma(Eigen::VectorXd& res_gamma, int j,
                        Eigen::VectorXd y,

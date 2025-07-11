@@ -11,12 +11,12 @@ DSD_pri_beta(alpha, x, b, q)
 
 \item{x}{covariate vector.}
 
-\item{b}{scale parameter of the undelying B2 prior.}
+\item{b}{scale parameter of the underlying B2 prior.}
 
-\item{q}{shape parameter of the undelying B2 prior.}
+\item{q}{shape parameter of the underlying B2 prior.}
 }
 \value{
-A list with the prior name and all the quantities required to implment it within the sampler.
+A list with the prior name and all the quantities required to implement it within the sampler.
 }
 \description{
 Allow the user to specify a DSD prior for the scale parameter for the regression coefficient beta prior.

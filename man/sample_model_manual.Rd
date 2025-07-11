@@ -48,7 +48,7 @@ sample_model_manual(
 \item{thin}{Number of thinned observations.}
 }
 \value{
-The function returns a list with the drawns from the posterior ditribution of the model parameters.
+The function returns a list with the drowns from the posterior distribution of the model parameters.
 }
 \description{
 Allow the user to specify a Bayesian linear mixed model, with flexibility in the prior choices.

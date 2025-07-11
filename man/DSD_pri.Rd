@@ -15,14 +15,14 @@ DSD_pri(alpha, beta, alpha_til, beta_til, b, p, q)
 
 \item{beta_til}{parameter related to the precision matrix.}
 
-\item{b}{scale parameter of the undelying B2 prior.}
+\item{b}{scale parameter of the underlying B2 prior.}
 
-\item{p}{shape parameter of the undelying B2 prior.}
+\item{p}{shape parameter of the underlying B2 prior.}
 
-\item{q}{shape parameter of the undelying B2 prior.}
+\item{q}{shape parameter of the underlying B2 prior.}
 }
 \value{
-A list with the prior name and all the quantities required to implment it within the sampler.
+A list with the prior name and all the quantities required to implement it within the sampler.
 }
 \description{
 Allow the user to specify a DSD prior for the scale parameter related to a Gaussian random effect

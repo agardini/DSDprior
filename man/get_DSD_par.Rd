@@ -7,11 +7,11 @@
 get_DSD_par(reff)
 }
 \arguments{
-\item{reff}{An object of class \code{"reff"} produced by the function \code{\link{get_reff}}}
+\item{reff}{An object of class \code{"reff"} produced by the function \link{get_reff}}
 }
 \value{
 A list with \eqn{\tilde{\alpha}}, \eqn{\tilde{\beta}} and the mean of the non-null eigenvalues \eqn{\lambda}.
 }
 \description{
-Starting from a list produced by the function \code{\link{get_reff}}, the quantities required to implement a DSD prior are computed.
+Starting from a list produced by the function \link{get_reff}, the quantities required to implement a DSD prior are computed.
 }

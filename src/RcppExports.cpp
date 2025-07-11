@@ -107,6 +107,50 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sample_poissonm_nob_auto
+Rcpp::List sample_poissonm_nob_auto(const Eigen::VectorXi y, const Eigen::MatrixXd X, const Rcpp::List Z_list, const Rcpp::List K_list, const std::vector<int> rank_K_g, const Rcpp::List A_list, const Rcpp::List e_list, const Eigen::MatrixXd S_beta, const Rcpp::List pri_s2b, const Rcpp::List pri_s2g, const Eigen::VectorXd beta_init, const Rcpp::List g_init_list, const Eigen::VectorXd S2g_init, Eigen::VectorXd FFb, Eigen::VectorXd FFg, const int n0, const Eigen::VectorXd log_offset, std::vector<Eigen::VectorXd> m_mix_orig, std::vector<Eigen::VectorXd> v_mix_orig, std::vector<Eigen::VectorXd> w_mix_orig, std::vector<Eigen::VectorXd> m_mix_adj, std::vector<Eigen::VectorXd> v_mix_adj, std::vector<Eigen::VectorXd> w_mix_adj, Eigen::VectorXd check_mix_min, Eigen::VectorXd check_mix_max, int b_gibbs_start, int b_check, double threshold_MH, double threshold_adj, const int niter, const int pr, const int thin, const int ntuning, const int stop_tuning);
+RcppExport SEXP _DSDprior_sample_poissonm_nob_auto(SEXP ySEXP, SEXP XSEXP, SEXP Z_listSEXP, SEXP K_listSEXP, SEXP rank_K_gSEXP, SEXP A_listSEXP, SEXP e_listSEXP, SEXP S_betaSEXP, SEXP pri_s2bSEXP, SEXP pri_s2gSEXP, SEXP beta_initSEXP, SEXP g_init_listSEXP, SEXP S2g_initSEXP, SEXP FFbSEXP, SEXP FFgSEXP, SEXP n0SEXP, SEXP log_offsetSEXP, SEXP m_mix_origSEXP, SEXP v_mix_origSEXP, SEXP w_mix_origSEXP, SEXP m_mix_adjSEXP, SEXP v_mix_adjSEXP, SEXP w_mix_adjSEXP, SEXP check_mix_minSEXP, SEXP check_mix_maxSEXP, SEXP b_gibbs_startSEXP, SEXP b_checkSEXP, SEXP threshold_MHSEXP, SEXP threshold_adjSEXP, SEXP niterSEXP, SEXP prSEXP, SEXP thinSEXP, SEXP ntuningSEXP, SEXP stop_tuningSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXi >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List >::type Z_list(Z_listSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List >::type K_list(K_listSEXP);
+    Rcpp::traits::input_parameter< const std::vector<int> >::type rank_K_g(rank_K_gSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List >::type A_list(A_listSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List >::type e_list(e_listSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd >::type S_beta(S_betaSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List >::type pri_s2b(pri_s2bSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List >::type pri_s2g(pri_s2gSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd >::type beta_init(beta_initSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List >::type g_init_list(g_init_listSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd >::type S2g_init(S2g_initSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type FFb(FFbSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type FFg(FFgSEXP);
+    Rcpp::traits::input_parameter< const int >::type n0(n0SEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd >::type log_offset(log_offsetSEXP);
+    Rcpp::traits::input_parameter< std::vector<Eigen::VectorXd> >::type m_mix_orig(m_mix_origSEXP);
+    Rcpp::traits::input_parameter< std::vector<Eigen::VectorXd> >::type v_mix_orig(v_mix_origSEXP);
+    Rcpp::traits::input_parameter< std::vector<Eigen::VectorXd> >::type w_mix_orig(w_mix_origSEXP);
+    Rcpp::traits::input_parameter< std::vector<Eigen::VectorXd> >::type m_mix_adj(m_mix_adjSEXP);
+    Rcpp::traits::input_parameter< std::vector<Eigen::VectorXd> >::type v_mix_adj(v_mix_adjSEXP);
+    Rcpp::traits::input_parameter< std::vector<Eigen::VectorXd> >::type w_mix_adj(w_mix_adjSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type check_mix_min(check_mix_minSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type check_mix_max(check_mix_maxSEXP);
+    Rcpp::traits::input_parameter< int >::type b_gibbs_start(b_gibbs_startSEXP);
+    Rcpp::traits::input_parameter< int >::type b_check(b_checkSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold_MH(threshold_MHSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold_adj(threshold_adjSEXP);
+    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
+    Rcpp::traits::input_parameter< const int >::type pr(prSEXP);
+    Rcpp::traits::input_parameter< const int >::type thin(thinSEXP);
+    Rcpp::traits::input_parameter< const int >::type ntuning(ntuningSEXP);
+    Rcpp::traits::input_parameter< const int >::type stop_tuning(stop_tuningSEXP);
+    rcpp_result_gen = Rcpp::wrap(sample_poissonm_nob_auto(y, X, Z_list, K_list, rank_K_g, A_list, e_list, S_beta, pri_s2b, pri_s2g, beta_init, g_init_list, S2g_init, FFb, FFg, n0, log_offset, m_mix_orig, v_mix_orig, w_mix_orig, m_mix_adj, v_mix_adj, w_mix_adj, check_mix_min, check_mix_max, b_gibbs_start, b_check, threshold_MH, threshold_adj, niter, pr, thin, ntuning, stop_tuning));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sample_bprobm
 Rcpp::List sample_bprobm(const Eigen::VectorXi y, const Eigen::MatrixXd X, const Rcpp::List Z_list, const Rcpp::List K_list, const std::vector<int> rank_K_g, const Rcpp::List A_list, const Rcpp::List e_list, const Eigen::MatrixXd S_beta, const Rcpp::List pri_s2e, const Rcpp::List pri_s2b, const Rcpp::List pri_s2g, const Eigen::VectorXd beta_init, const Rcpp::List g_init_list, const Eigen::VectorXd S2g_init, const double s2e_init, double FFe, Eigen::VectorXd FFb, Eigen::VectorXd FFg, const int niter, const int pr, const int thin, const int ntuning, const int stop_tuning);
 RcppExport SEXP _DSDprior_sample_bprobm(SEXP ySEXP, SEXP XSEXP, SEXP Z_listSEXP, SEXP K_listSEXP, SEXP rank_K_gSEXP, SEXP A_listSEXP, SEXP e_listSEXP, SEXP S_betaSEXP, SEXP pri_s2eSEXP, SEXP pri_s2bSEXP, SEXP pri_s2gSEXP, SEXP beta_initSEXP, SEXP g_init_listSEXP, SEXP S2g_initSEXP, SEXP s2e_initSEXP, SEXP FFeSEXP, SEXP FFbSEXP, SEXP FFgSEXP, SEXP niterSEXP, SEXP prSEXP, SEXP thinSEXP, SEXP ntuningSEXP, SEXP stop_tuningSEXP) {
@@ -146,6 +190,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_DSDprior_l_pri_s2", (DL_FUNC) &_DSDprior_l_pri_s2, 2},
     {"_DSDprior_sample_blmm", (DL_FUNC) &_DSDprior_sample_blmm, 23},
     {"_DSDprior_sample_logitm", (DL_FUNC) &_DSDprior_sample_logitm, 23},
+    {"_DSDprior_sample_poissonm_nob_auto", (DL_FUNC) &_DSDprior_sample_poissonm_nob_auto, 34},
     {"_DSDprior_sample_bprobm", (DL_FUNC) &_DSDprior_sample_bprobm, 23},
     {NULL, NULL, 0}
 };

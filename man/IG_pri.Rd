@@ -12,7 +12,7 @@ IG_pri(a, b)
 \item{b}{scale parameter.}
 }
 \value{
-A list with the prior name and all the quantities required to implment it within the sampler.
+A list with the prior name and all the quantities required to implement it within the sampler.
 }
 \description{
 Allow the user to specify an Inverse Gamma prior for a variance parameter

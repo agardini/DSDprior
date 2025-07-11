@@ -80,6 +80,29 @@ int is_mixture_pri_beta(Rcpp::List pri){
   return(out);
 }
 
+void metropolis_s2g_noblock(Eigen::VectorXd& s2g,
+                            Eigen::MatrixXd Q_gamma_j,
+                            Eigen::VectorXd gamma_j,
+                            Rcpp::List pri_s2g_j,
+                            double rank_Q_j,
+                            double FFg_j,
+                            int j,
+                            std::vector<int>& n_acc_s2g){
+
+  double s2g_prop, lfc_curr, lfc_prop;
+
+  lfc_curr = - rank_Q_j * 0.5 * std::log(s2g[j]) - 0.5 / s2g[j] * gamma_j.transpose() * Q_gamma_j * gamma_j;
+  lfc_curr += l_pri_s2(s2g[j], pri_s2g_j);
+
+  rprop_rw(s2g_prop, s2g[j], FFg_j);
+  lfc_prop = - rank_Q_j * 0.5 * std::log(s2g_prop) - 0.5 / s2g_prop * gamma_j.transpose() * Q_gamma_j * gamma_j;
+  lfc_prop += l_pri_s2(s2g_prop, pri_s2g_j);
+
+  if(metropolis_acceptance(lfc_prop, lfc_curr) == 1L){
+    s2g[j] = s2g_prop;
+    n_acc_s2g[j] +=1;
+  }
+}
 
 void metropolis_s2b(Eigen::VectorXd& s2b,
                     Eigen::MatrixXd& Q_beta,

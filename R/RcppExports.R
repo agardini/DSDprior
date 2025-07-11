@@ -20,6 +20,10 @@ sample_logitm <- function(y, X, Z_list, K_list, rank_K_g, A_list, e_list, S_beta
     .Call(`_DSDprior_sample_logitm`, y, X, Z_list, K_list, rank_K_g, A_list, e_list, S_beta, pri_s2e, pri_s2b, pri_s2g, beta_init, g_init_list, S2g_init, s2e_init, FFe, FFb, FFg, niter, pr, thin, ntuning, stop_tuning)
 }
 
+sample_poissonm_nob_auto <- function(y, X, Z_list, K_list, rank_K_g, A_list, e_list, S_beta, pri_s2b, pri_s2g, beta_init, g_init_list, S2g_init, FFb, FFg, n0, log_offset, m_mix_orig, v_mix_orig, w_mix_orig, m_mix_adj, v_mix_adj, w_mix_adj, check_mix_min, check_mix_max, b_gibbs_start, b_check, threshold_MH, threshold_adj, niter, pr, thin, ntuning, stop_tuning) {
+    .Call(`_DSDprior_sample_poissonm_nob_auto`, y, X, Z_list, K_list, rank_K_g, A_list, e_list, S_beta, pri_s2b, pri_s2g, beta_init, g_init_list, S2g_init, FFb, FFg, n0, log_offset, m_mix_orig, v_mix_orig, w_mix_orig, m_mix_adj, v_mix_adj, w_mix_adj, check_mix_min, check_mix_max, b_gibbs_start, b_check, threshold_MH, threshold_adj, niter, pr, thin, ntuning, stop_tuning)
+}
+
 #'
 sample_bprobm <- function(y, X, Z_list, K_list, rank_K_g, A_list, e_list, S_beta, pri_s2e, pri_s2b, pri_s2g, beta_init, g_init_list, S2g_init, s2e_init, FFe, FFb, FFg, niter, pr, thin, ntuning, stop_tuning) {
     .Call(`_DSDprior_sample_bprobm`, y, X, Z_list, K_list, rank_K_g, A_list, e_list, S_beta, pri_s2e, pri_s2b, pri_s2g, beta_init, g_init_list, S2g_init, s2e_init, FFe, FFb, FFg, niter, pr, thin, ntuning, stop_tuning)

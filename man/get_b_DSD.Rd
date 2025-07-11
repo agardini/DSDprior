@@ -20,10 +20,10 @@ get_b_DSD(pi_0 = 0.5, c, n, p_DSD, q_DSD, n_sim = 1e+06)
 \item{pi}{probability related to the quantile.}
 }
 \value{
-The parameter \code{b} that delievers a prior distribution for the random effect sample variance \eqn{V} satisfying the relation \deqn{
+The parameter \code{b} that delivers a prior distribution for the random effect sample variance \eqn{V} satisfying the relation \deqn{
 P[V>c]=pi
 }
 }
 \description{
-Allow to retrieve the B2 scale parameter b uner the considered probabilistic statement
+Allow to retrieve the B2 scale parameter b under the considered probabilistic statement
 }

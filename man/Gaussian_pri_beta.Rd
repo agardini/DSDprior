@@ -7,7 +7,7 @@
 Gaussian_pri_beta()
 }
 \value{
-A list with the prior name and all the quantities required to implment it within the sampler.
+A list with the prior name and all the quantities required to implement it within the sampler.
 }
 \description{
 Allow the user to specify a standard Gaussian prior for the regression coefficient beta.

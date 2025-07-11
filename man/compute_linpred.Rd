@@ -7,12 +7,12 @@
 compute_linpred(out, X, Z_list)
 }
 \arguments{
-\item{out}{Object created by \link{\code{sample_modelDSD}}, \link{\code{sample_model_manual}} or \link{\code{burn_thin}}.}
+\item{out}{Object created by \code{sample_modelDSD}, \code{sample_model_manual} or \code{burn_thin}.}
 
 \item{X}{Fixed effects design matrix.}
 
 \item{Z_list}{List of design matrices related to random effects.}
 }
 \description{
-Receiving as input the result of \link{\code{sample_modelDSD}}, \link{\code{sample_model_manual}} or \link{\code{burn_thin}} functions, computes the linear predictor in the points provided throug the design matrices.
+Receiving as input the result of \code{sample_modelDSD}, \code{sample_model_manual} or \code{burn_thin} functions, computes the linear predictor in the points provided through the design matrices.
 }
